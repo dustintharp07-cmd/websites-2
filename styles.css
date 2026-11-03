@@ -1,0 +1,50 @@
+/* css styles */
+.billboard-page {
+  max-width: 1080px;
+  margin: 0 auto 1.5rem;
+  padding: 0 clamp(0rem, 2vw, 1rem);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.billboard-page .html-widget {
+  width: 100% !important;
+  height: clamp(340px, 52vw, 520px) !important;
+  margin: 0 auto;
+}
+
+.billboard-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 1.5rem;
+  max-width: 620px;
+  margin: 0.5rem auto 0;
+  padding: 0.9rem 1rem;
+  border-top: 1px solid #e5eaf0;
+  color: #425466;
+  font-size: 0.9rem;
+}
+
+.billboard-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.billboard-legend-swatch {
+  flex: 0 0 1.35rem;
+  height: 3px;
+  border-radius: 2px;
+}
+
+@media (max-width: 600px) {
+  .billboard-page .html-widget {
+    height: 390px !important;
+  }
+
+  .billboard-legend {
+    grid-template-columns: 1fr;
+    max-width: 340px;
+    padding-inline: 0.25rem;
+  }
+}

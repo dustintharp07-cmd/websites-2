@@ -1,0 +1,101 @@
+---
+title: "Billboard Graphic"
+execute:
+  echo: false
+---
+
+```{r}
+#| message: false
+library(tidyverse)
+```
+
+```{r}
+billboard_long <- billboard |>
+  pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    values_to = "rank",
+    values_drop_na = TRUE
+  ) |>
+  mutate(
+    week = readr::parse_number(week),
+    rank = as.numeric(rank)
+  ) |>
+  filter(artist %in% head(unique(artist), 8))
+
+artists <- billboard_long |>
+  distinct(artist) |>
+  pull(artist)
+
+artist_palette <- c(
+  "#332288", "#88CCEE", "#44AA99", "#117733",
+  "#999933", "#DDCC77", "#CC6677", "#882255"
+)
+artist_colors <- stats::setNames(artist_palette[seq_along(artists)], artists)
+
+chart <- ggplot(billboard_long, aes(x = week, y = rank, color = artist, group = track)) +
+  geom_line(linewidth = 1.05, alpha = 0.85) +
+  geom_point(size = 1.5, alpha = 0.9) +
+  scale_x_continuous(
+    breaks = scales::breaks_width(10),
+    expand = expansion(mult = c(0.01, 0.03))
+  ) +
+  scale_y_reverse(
+    breaks = c(1, seq(10, 100, by = 10)),
+    expand = expansion(mult = c(0.02, 0.02))
+  ) +
+  scale_color_manual(values = artist_colors, breaks = artists) +
+  labs(
+    x = "Week on chart",
+    y = "Billboard Hot 100 rank (1 = highest)",
+    title = "A song's journey on the Billboard Hot 100",
+    subtitle = "Weekly chart positions for eight artists"
+  ) +
+  theme_minimal(base_size = 12, base_family = "sans") +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, color = "#172B4D"),
+    plot.subtitle = element_text(size = 10.5, color = "#65758B"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = "#EDF1F5", linewidth = 0.35),
+    panel.grid.major.y = element_line(color = "#DCE3EA", linewidth = 0.45),
+    axis.title = element_text(color = "#425466"),
+    axis.text = element_text(color = "#526174"),
+    plot.title.position = "plot",
+    plot.margin = margin(8, 8, 4, 8),
+    legend.position = "none"
+  )
+
+legend_items <- purrr::map2(
+  artists,
+  unname(artist_colors),
+  \(artist, color) htmltools::div(
+    class = "billboard-legend-item",
+    htmltools::span(
+      class = "billboard-legend-swatch",
+      style = paste0("background-color: ", color)
+    ),
+    htmltools::span(artist)
+  )
+)
+
+htmltools::div(
+  class = "billboard-page",
+  plotly::ggplotly(chart, tooltip = c("artist", "week", "rank")) |>
+    plotly::layout(
+      autosize = TRUE,
+      showlegend = FALSE,
+      font = list(
+        family = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        color = "#425466"
+      ),
+      paper_bgcolor = "rgba(0,0,0,0)",
+      plot_bgcolor = "rgba(0,0,0,0)",
+      margin = list(l = 72, r = 18, t = 66, b = 58)
+    ) |>
+    plotly::config(displayModeBar = FALSE, responsive = TRUE),
+  htmltools::div(
+    class = "billboard-legend",
+    htmltools::tagList(legend_items)
+  )
+)
+```
